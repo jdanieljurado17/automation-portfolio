@@ -9,6 +9,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
 
+
 public class PetRequests {
 
 
@@ -122,4 +123,24 @@ public class PetRequests {
         return response.asString();
     }
 
+    public static JsonNode updatePetByFormRequest(String petId, String petName, String petStatus) throws JsonProcessingException {
+        ServiceProperty serviceProperty = ServiceProperty.getServiceProperties();
+        String baseUrl = serviceProperty.getBaseUrl();
+        String petPath = serviceProperty.getPetPath();
+        String apiKey = serviceProperty.getApiKey();
+
+        RestAssured.baseURI = baseUrl;
+
+        Response response = RestAssured.given()
+                .header("api_key", apiKey)
+                .contentType(ContentType.JSON)
+                .queryParam("name", petName)
+                .queryParam("status", petStatus)
+                .post(petPath + "/" + petId);
+
+        response.then().assertThat().statusCode(200);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readTree(response.asString());
+    }
 }
